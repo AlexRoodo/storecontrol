@@ -10,7 +10,7 @@ public class StoreSales {
                 System.exit(1);
             }
             Store store = new Store(Integer.parseInt(args[0]));
-            store.start();
+            store.startSales();
         } catch (NumberFormatException e) {
             System.out.println("Введен некорректный аргумент");
         }
