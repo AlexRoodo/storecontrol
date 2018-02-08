@@ -18,7 +18,7 @@ public class Store {
     static int limit;
     static CyclicBarrier BARRIER;
 
-    public void start() {
+    public void startSales() {
         ExecutorService executor = Executors.newFixedThreadPool(count);
         Runnable customer = new Customer();
         for (int i = 0; i < count; i++) {
