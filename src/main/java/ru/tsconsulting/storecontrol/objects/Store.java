@@ -7,22 +7,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Store {
 
-    public Store(int count) {
-        Store.count = count;
-        Store.BARRIER = new CyclicBarrier(count);
-        Store.limit = atomicInteger.get() / count;
+    public Store() {
+        this(5);
     }
 
-    static AtomicInteger atomicInteger = new AtomicInteger(1000);
+    public Store(int count) {
+        Store.count = count;
+        this.BARRIER = new CyclicBarrier(count);
+        this.limit = goodsAmount.get() / count;
+    }
+
+    public static AtomicInteger goodsAmount = new AtomicInteger(1000);
     private static int count;
-    static int limit;
-    static CyclicBarrier BARRIER;
+    private int limit;
+    private CyclicBarrier BARRIER;
 
     public void startSales() {
         ExecutorService executor = Executors.newFixedThreadPool(count);
-        Runnable customer = new Customer();
         for (int i = 0; i < count; i++) {
-            executor.submit(customer);
+            executor.submit(new Customer(goodsAmount, BARRIER, limit));
         }
         executor.shutdown();
     }
