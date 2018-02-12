@@ -23,33 +23,31 @@ public class Customer implements Runnable {
         int bound = 11;
 
         try {
+            BARRIER.await();
 
-        BARRIER.await();
-
-        while (customerGoodsAmount <= limit ) {
-            int currentGoodsPurchaseAmount =
-                    ThreadLocalRandom.current().nextInt(1, bound);
-            if (limit < customerGoodsAmount + currentGoodsPurchaseAmount) {
-                bound--;
-                if (bound == 1) {
-                    break;
+            while (customerGoodsAmount <= limit) {
+                int currentGoodsPurchaseAmount =
+                        ThreadLocalRandom.current().nextInt(1, bound);
+                if (limit < customerGoodsAmount + currentGoodsPurchaseAmount) {
+                    bound--;
+                    if (bound == 1) {
+                        break;
+                    }
+                    continue;
                 }
-                continue;
+                purchasesAmount++;
+                customerGoodsAmount += currentGoodsPurchaseAmount;
+                storeGoodsAmount.getAndAdd(-currentGoodsPurchaseAmount);
             }
-            purchasesAmount++;
-            customerGoodsAmount += currentGoodsPurchaseAmount;
-            storeGoodsAmount.getAndAdd(-currentGoodsPurchaseAmount);
-        }
 
-        BARRIER.await();
+            BARRIER.await();
 
-        if (storeGoodsAmount.decrementAndGet() < 0) {
-            storeGoodsAmount.incrementAndGet();
-        } else {
-            customerGoodsAmount++;
-            purchasesAmount++;
-        }
-
+            if (storeGoodsAmount.decrementAndGet() < 0) {
+                storeGoodsAmount.incrementAndGet();
+            } else {
+                customerGoodsAmount++;
+                purchasesAmount++;
+            }
         } catch (InterruptedException e) {
             System.out.println("Customer interrupted exception");
         } catch (BrokenBarrierException e) {
