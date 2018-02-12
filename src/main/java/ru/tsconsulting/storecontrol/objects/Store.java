@@ -17,7 +17,7 @@ public class Store {
         this.limit = goodsAmount.get() / count;
     }
 
-    public static AtomicInteger goodsAmount = new AtomicInteger(1000);
+    private static AtomicInteger goodsAmount = new AtomicInteger(1000);
     private static int count;
     private int limit;
     private CyclicBarrier BARRIER;

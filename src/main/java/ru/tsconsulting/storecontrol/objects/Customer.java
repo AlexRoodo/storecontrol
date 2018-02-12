@@ -1,26 +1,35 @@
 package ru.tsconsulting.storecontrol.objects;
 
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Customer implements Runnable {
+
+    public Customer(AtomicInteger storeGoodsAmount, CyclicBarrier BARRIER, int limit) {
+        this.storeGoodsAmount = storeGoodsAmount;
+        this.BARRIER = BARRIER;
+        this.limit = limit;
+    }
+
+    private AtomicInteger storeGoodsAmount;
+    private final CyclicBarrier BARRIER;
+    private final int limit;
+
     public void run() {
-        int goodsAmount = 0;
+        int customerGoodsAmount = 0;
         int purchasesAmount = 0;
         int bound = 11;
 
         try {
-            Store.BARRIER.await();
-        } catch (InterruptedException e) {
-            System.out.println("Customer interrupted exception");
-        } catch (BrokenBarrierException e) {
-            System.out.println("Customer broken barrier exception");
-        }
 
-        while (goodsAmount <= Store.limit && Store.atomicInteger.get() > 0) {
+        BARRIER.await();
+
+        while (customerGoodsAmount <= limit ) {
             int currentGoodsPurchaseAmount =
                     ThreadLocalRandom.current().nextInt(1, bound);
-            if (Store.limit < goodsAmount + currentGoodsPurchaseAmount) {
+            if (limit < customerGoodsAmount + currentGoodsPurchaseAmount) {
                 bound--;
                 if (bound == 1) {
                     break;
@@ -28,18 +37,19 @@ public class Customer implements Runnable {
                 continue;
             }
             purchasesAmount++;
-            goodsAmount += currentGoodsPurchaseAmount;
-            Store.atomicInteger.getAndAdd(-currentGoodsPurchaseAmount);
+            customerGoodsAmount += currentGoodsPurchaseAmount;
+            storeGoodsAmount.getAndAdd(-currentGoodsPurchaseAmount);
         }
 
-        try {
-            Store.BARRIER.await();
-            if (Store.atomicInteger.decrementAndGet() < 0) {
-                Store.atomicInteger.incrementAndGet();
-            } else {
-                goodsAmount++;
-                purchasesAmount++;
-            }
+        BARRIER.await();
+
+        if (storeGoodsAmount.decrementAndGet() < 0) {
+            storeGoodsAmount.incrementAndGet();
+        } else {
+            customerGoodsAmount++;
+            purchasesAmount++;
+        }
+
         } catch (InterruptedException e) {
             System.out.println("Customer interrupted exception");
         } catch (BrokenBarrierException e) {
@@ -47,6 +57,6 @@ public class Customer implements Runnable {
         }
 
         System.out.printf("Покупатель - %-10s\nТоваров куплено - %-5s\tсделок - %-5s\n\n",
-                Thread.currentThread().getName(), goodsAmount, purchasesAmount);
+                Thread.currentThread().getName(), customerGoodsAmount, purchasesAmount);
     }
 }
