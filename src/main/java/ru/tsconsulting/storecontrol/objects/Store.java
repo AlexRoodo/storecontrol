@@ -12,13 +12,13 @@ public class Store {
     }
 
     public Store(int count) {
-        Store.count = count;
+        this.count = count;
         this.BARRIER = new CyclicBarrier(count);
         this.limit = goodsAmount.get() / count;
     }
 
     private static AtomicInteger goodsAmount = new AtomicInteger(1000);
-    private static int count;
+    private  int count;
     private int limit;
     private CyclicBarrier BARRIER;
 
