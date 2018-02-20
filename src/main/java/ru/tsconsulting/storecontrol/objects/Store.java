@@ -12,7 +12,7 @@ public class Store {
     }
 
     private boolean storeIsEmpty = false;
-    private static AtomicInteger goodsAmount = new AtomicInteger(100);
+    private static AtomicInteger goodsAmount = new AtomicInteger(1000);
     private int count;
     private final CyclicBarrier barrier;
 
