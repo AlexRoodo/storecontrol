@@ -50,12 +50,12 @@ public class Store {
                         Thread.currentThread().getName(), customerGoodsAmount, purchasesAmount);
             });
         }
+        
         executor.shutdown();
     }
 
     private int tryToBuy(int amount) {
-        goodsAmount.getAndAdd(-amount);
-        if (goodsAmount.get() >= 0) {
+        if (goodsAmount.addAndGet(-amount) >= 0) {
             return amount;
         } else if (!storeIsEmpty) {
             storeIsEmpty = true;
