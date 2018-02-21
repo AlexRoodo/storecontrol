@@ -19,36 +19,36 @@ public class Store {
         ExecutorService executor = Executors.newFixedThreadPool(count);
 
         for (int i = 0; i < count; i++) {
-        executor.submit(() -> {
-            int customerGoodsAmount = 0;
-            int purchasesAmount = 0;
-            int bound = 11;
+            executor.submit(() -> {
+                int customerGoodsAmount = 0;
+                int purchasesAmount = 0;
+                int bound = 11;
 
-            try {
-                barrier.await();
-                while (!storeIsEmpty) {
-                    int currentGoodsPurchaseAmount =
-                            ThreadLocalRandom.current().nextInt(1, bound);
-                    int buyResult = tryToBuy(currentGoodsPurchaseAmount);
-                    if (buyResult > 0) {
-                        purchasesAmount++;
-                        customerGoodsAmount += buyResult;
-                    } else {
-                        break;
+                try {
+                    barrier.await();
+                    while (!storeIsEmpty) {
+                        int currentGoodsPurchaseAmount =
+                                ThreadLocalRandom.current().nextInt(1, bound);
+                        int buyResult = tryToBuy(currentGoodsPurchaseAmount);
+                        if (buyResult > 0) {
+                            purchasesAmount++;
+                            customerGoodsAmount += buyResult;
+                        } else {
+                            break;
+                        }
+                        barrier.await(500, TimeUnit.MILLISECONDS);
                     }
-                    barrier.await(500, TimeUnit.MILLISECONDS);
+                } catch (TimeoutException e) {
+                    System.out.println(Thread.currentThread().getName() + " закончил ожидание");
+                } catch (InterruptedException e) {
+                    System.out.println("Customer interrupted exception");
+                } catch (BrokenBarrierException e) {
+                    System.out.println("Customer broken barrier exception");
                 }
-            } catch (TimeoutException e) {
-                System.out.println(Thread.currentThread().getName() + " закончил ожидание");
-            } catch (InterruptedException e) {
-                System.out.println("Customer interrupted exception");
-            } catch (BrokenBarrierException e) {
-                System.out.println("Customer broken barrier exception");
-            }
 
-            System.out.printf("Покупатель - %-10s\nТоваров куплено - %-5s\tсделок - %-5s\n",
-                    Thread.currentThread().getName(), customerGoodsAmount, purchasesAmount);
-        });
+                System.out.printf("Покупатель - %-10s\nТоваров куплено - %-5s\tсделок - %-5s\n",
+                        Thread.currentThread().getName(), customerGoodsAmount, purchasesAmount);
+            });
         }
 
         executor.shutdown();
