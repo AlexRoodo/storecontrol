@@ -2,7 +2,7 @@ package ru.tsconsulting.storecontrol;
 
 import ru.tsconsulting.storecontrol.objects.Store;
 
-public class StoreSales {
+public class StartStoreSales {
     public static void main(String[] args) {
         try {
             if (args.length != 1 || Integer.parseInt(args[0]) <= 0) {
