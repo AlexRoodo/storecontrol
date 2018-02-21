@@ -7,7 +7,7 @@ public class StartStoreSales {
         try {
             if (args.length != 1 || Integer.parseInt(args[0]) <= 0) {
                 System.out.println("Необходимо передать программе 1 аргумент - количество покупателей");
-                System.exit(1);
+                throw new NumberFormatException();
             }
             Store store = new Store(Integer.parseInt(args[0]));
             store.startSales();
