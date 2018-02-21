@@ -60,7 +60,7 @@ public class Store {
             return amount;
         } else if (!storeIsEmpty) {
             storeIsEmpty = true;
-            int newAmount = goodsAmount.get() + amount;
+            int newAmount = goodsAmount.addAndGet(amount);
             goodsAmount.set(0);
             return newAmount;
         } else {
