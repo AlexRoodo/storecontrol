@@ -5,34 +5,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Store {
 
-    public Store(int count) {
-        this.count = count;
-        barrier = new CyclicBarrier(count);
+    public Store(int numberOfCustomers) {
+        this.numberOfCustomers = numberOfCustomers;
+        barrier = new CyclicBarrier(numberOfCustomers);
     }
 
-    private volatile boolean storeIsEmpty = false;
-    private static AtomicInteger goodsAmount = new AtomicInteger(1000);
-    private int count;
+    private volatile boolean isStorageEmpty = false;
+    private static AtomicInteger quantityOfGoods = new AtomicInteger(1000);
+    private int numberOfCustomers;
     private final CyclicBarrier barrier;
 
     public void startSales() {
-        ExecutorService executor = Executors.newFixedThreadPool(count);
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfCustomers);
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < numberOfCustomers; i++) {
             executor.submit(() -> {
-                int customerGoodsAmount = 0;
-                int purchasesAmount = 0;
-                int bound = 11;
+                int bought = 0;
+                int operations = 0;
 
                 try {
                     barrier.await();
-                    while (!storeIsEmpty) {
-                        int currentGoodsPurchaseAmount =
-                                ThreadLocalRandom.current().nextInt(1, bound);
-                        int buyResult = tryToBuy(currentGoodsPurchaseAmount);
+                    while (!isStorageEmpty) {
+                        int buyResult = tryToBuy(ThreadLocalRandom.current()
+                                                                  .nextInt(1, 11));
                         if (buyResult > 0) {
-                            purchasesAmount++;
-                            customerGoodsAmount += buyResult;
+                            operations++;
+                            bought += buyResult;
                         } else {
                             break;
                         }
@@ -47,24 +45,23 @@ public class Store {
                 }
 
                 System.out.printf("Покупатель - %-10s\nТоваров куплено - %-5s\tсделок - %-5s\n",
-                        Thread.currentThread().getName(), customerGoodsAmount, purchasesAmount);
+                        Thread.currentThread().getName(), bought, operations);
             });
         }
-
         executor.shutdown();
     }
 
     private int tryToBuy(int amount) {
-        if (goodsAmount.addAndGet(-amount) >= 0) {
+        if (quantityOfGoods.addAndGet(-amount) >= 0) {
             return amount;
-        } else if (!storeIsEmpty) {
-            storeIsEmpty = true;
-            int newAmount = goodsAmount.addAndGet(amount);
-            goodsAmount.set(0);
+        } else if (!isStorageEmpty) {
+            isStorageEmpty = true;
+            int newAmount = quantityOfGoods.addAndGet(amount);
+            quantityOfGoods.set(0);
             return newAmount;
         } else {
-            goodsAmount.getAndAdd(amount);
-            storeIsEmpty = true;
+            quantityOfGoods.getAndAdd(amount);
+            isStorageEmpty = true;
             return 0;
         }
     }
