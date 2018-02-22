@@ -36,7 +36,7 @@ public class Store {
                         } else {
                             break;
                         }
-                        barrier.await(500, TimeUnit.MILLISECONDS);
+                        barrier.await(100, TimeUnit.MILLISECONDS);
                     }
                 } catch (TimeoutException e) {
                     System.out.println(Thread.currentThread().getName() + " закончил ожидание");
@@ -55,7 +55,7 @@ public class Store {
     }
 
     private int tryToBuy(int amount) {
-        if (goodsAmount.getAndAdd(-amount) >= 0) {
+        if (goodsAmount.addAndGet(-amount) >= 0) {
             return amount;
         } else if (!storeIsEmpty) {
             storeIsEmpty = true;
